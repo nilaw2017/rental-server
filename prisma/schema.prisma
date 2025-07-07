@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// server/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int           @id @default(autoincrement())
+  name        String
+  email       String        @unique
+  password    String
+  questions   Question[]    @relation("AuthoredQuestions")
+  submissions Submission[]
+  createdAt   DateTime      @default(now())
+}
+
+model Question {
+  id          Int        @id @default(autoincrement())
+  subject     String
+  text        String
+  // store options as JSON array of strings
+  options     Json
+  // the correct answer text
+  answer      String
+  author      User       @relation("AuthoredQuestions", fields: [authorId], references: [id])
+  authorId    Int
+  submissions Submission[]
+  createdAt   DateTime   @default(now())
+}
+
+model Submission {
+  id             Int      @id @default(autoincrement())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         Int
+  question       Question @relation(fields: [questionId], references: [id])
+  questionId     Int
+  selectedOption String
+  isCorrect      Boolean
+  attemptedAt    DateTime @default(now())
+}
