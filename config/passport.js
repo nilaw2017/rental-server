@@ -1,6 +1,8 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const prisma = require("../routes/auth");
+const bcrypt = require("bcryptjs");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 
 passport.use(
   "local",
@@ -22,7 +24,10 @@ passport.use(
             message: "Invalid password",
           });
         }
-        return done(null, user);
+
+        // Don't send the password to the client
+        const { password: _, ...userWithoutPassword } = user;
+        return done(null, userWithoutPassword);
       } catch (error) {
         return done(error);
       }
@@ -36,7 +41,21 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        phone: true,
+        profileImage: true,
+        bio: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
     done(null, user);
   } catch (error) {
     done(error);

@@ -4,7 +4,11 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js -e ejs,js,css,html,scss",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
   "author": "",
